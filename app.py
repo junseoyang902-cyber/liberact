@@ -216,9 +216,9 @@ elif menu == "리액 이모저모 기록":
     for i,(n,c) in enumerate(actors.items(),1):
         st.write(f"{i}. {n} - {c}회")
 
-    st.markdown("### ⭐ 기연감 TOP 5")
+    st.markdown("### ⭐ 연출진 기록 TOP 5")
 
-    leaders = df[df['기연감'] == 'O']['부원명'].value_counts().head(5)
+    leaders = df[df['연출진'] == 'O']['부원명'].value_counts().head(5)
 
     for i, (name, count) in enumerate(leaders.items(), 1):
         st.write(f"{i}. {name} - {count}회")
