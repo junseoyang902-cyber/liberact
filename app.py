@@ -4,7 +4,8 @@ import pandas as pd
 st.set_page_config(page_title="리액위키", page_icon="🎭")
 
 st.title("🎭 리액위키")
-st.caption("📊 모든 데이터는 공용 데이터 기준으로 표시됩니다.")
+st.link_button("데이터 출처-리버액트 역대 공연 연혁", "https://slowdemoc.notion.site/dd6b64eea8784adebb3363d6db65d591?source=copy_link")
+st.caption("🛠️ made by 양준서")
 
 # ---------------------------
 # 📂 공용 데이터 자동 로딩
