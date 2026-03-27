@@ -128,7 +128,7 @@ elif menu == "기수별 부원 보기":
         leader = result[result['역할'].isin(['동장', '부동장'])]
 
         if not leader.empty:
-            st.markdown("### 👑 동장진")
+            st.markdown("### 👑 동장진({int({gen})-1}기)")
             for _, row in leader.iterrows():
                 st.write(f"{row['역할']} - {row['부원명']}")
 
