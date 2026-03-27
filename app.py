@@ -111,7 +111,7 @@ elif menu == "기수별 부원 보기":
     )
     gens = sorted(set([int(g[0]) for g in gens if g]))
 
-    gen = st.selectbox("기수 선택", gens+'기')
+    gen = st.selectbox("기수 선택", str(gens)+'기')
 
     # 🔥 선택된 기수 필터
     result = df[df['공연명'].str.contains(f"리버액트 {gen}기", na=False)]
