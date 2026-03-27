@@ -32,7 +32,7 @@ df_show = df[~df['공연명'].str.contains("리버액트", na=False)]
 st.divider()
 
 # ---------------------------
-# 1️⃣ 기능 선택
+# 1️⃣ 무엇이 궁금하신가요?
 # ---------------------------
 st.subheader("1️⃣ 기능 선택")
 
@@ -47,7 +47,7 @@ menu = st.selectbox("기능을 선택하세요", [
 st.divider()
 
 # ---------------------------
-# 2️⃣ 세부 선택
+# 2️⃣ 세부 사항
 # ---------------------------
 st.subheader("2️⃣ 세부 설정")
 
@@ -164,7 +164,7 @@ elif menu == "둘이 어떻게 아세요":
         merged = merged.sort_values(by='연도')
 
         if merged.empty:
-            st.warning("❌ 공동 활동 없음")
+            st.warning("❌ 둘이 모르는 사이라네요")
         else:
             for _, row in merged.iterrows():
                 r1 = row['역할_1']
@@ -216,10 +216,9 @@ elif menu == "리액 이모저모 기록":
     for i,(n,c) in enumerate(actors.items(),1):
         st.write(f"{i}. {n} - {c}회")
 
-    # 🔥 연도별 TOP (df_show 기준)
-    st.markdown("### 📅 한 해 최다 활동 TOP 5")
-    yearly = df_show.groupby(['연도','부원명']).size().reset_index(name='count')
-    yearly = yearly.sort_values(by='count', ascending=False).head(5)
+    st.markdown("### ⭐ 기연감 TOP 5")
 
-    for _, row in yearly.iterrows():
-        st.write(f"{row['연도']} - {row['부원명']} ({row['count']}회)")
+    leaders = df[df['기연감'] == 'O']['부원명'].value_counts().head(5)
+
+    for i, (name, count) in enumerate(leaders.items(), 1):
+        st.write(f"{i}. {name} - {count}회")
