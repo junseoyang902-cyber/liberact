@@ -3,7 +3,7 @@ import pandas as pd
 
 st.set_page_config(page_title="연극 동아리 관리 시스템", page_icon="🎭")
 
-st.title("🎭 동아리 활동 관리 시스템")
+st.title("🎭 리액위키")
 st.divider()
 
 # 상태 저장
