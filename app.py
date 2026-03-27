@@ -66,7 +66,8 @@ if menu == "부원별 활동 기록 보기":
 
     for _, row in result.iterrows():
         role = row['역할']
-        if role == '배우' or '단역' and pd.notna(row['배역']):
+        
+        if pd.notna(row['배역']):
             role += f" ({row['배역']})"
 
         st.markdown(
@@ -169,9 +170,9 @@ elif menu == "동아리 공동활동 찾기":
                 r1 = row['역할_1']
                 r2 = row['역할_2']
 
-                if r1 == '배우' and pd.notna(row['배역_1']):
+                if pd.notna(row['배역_1']):
                     r1 += f" ({row['배역_1']})"
-                if r2 == '배우' and pd.notna(row['배역_2']):
+                if pd.notna(row['배역_2']):
                     r2 += f" ({row['배역_2']})"
 
                 st.markdown(f"""
@@ -211,7 +212,7 @@ elif menu == "여러 기록 분석":
 
     # 🔥 배우 TOP (df_show 기준)
     st.markdown("### 🎭 배우 TOP 5")
-    actors = df_show[df_show['역할']=='배우']['부원명'].value_counts().head(5)
+    actors = df[df['역할'].str.contains('배우', na=False)]['부원명'].value_counts().head(5)
     for i,(n,c) in enumerate(actors.items(),1):
         st.write(f"{i}. {n} - {c}회")
 
