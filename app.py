@@ -127,8 +127,8 @@ elif menu == "공연별 참여 부원 보기":
         ]
 
         others = result[
-            (result['연출진'] != 'O') &
-            (result['역할'] != '연출')
+            (~result['역할'].str.contains('연출', na=False)) |   # 연출이 아니거나
+            (result['역할'].str.contains(',', na=False))        # 연출 + 다른 역할
         ]
 
         if not leaders.empty:
