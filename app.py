@@ -128,7 +128,9 @@ elif menu == "기수별 부원 보기":
             for _, row in leader.iterrows():
                 st.write(f"{row['역할']} - {row['부원명']}")
 
-        members = sorted(result['부원명'].unique())
+        members = sorted(
+    result[~result['역할'].isin(['동장', '부동장'])]['부원명'].unique()
+)
 
         st.markdown("### 👥 부원")
         for name in members:
