@@ -1,170 +1,195 @@
 import streamlit as st
 import pandas as pd
 
-# 페이지 설정
-st.set_page_config(
-    page_title="연극 동아리 활동 조회",
-    page_icon="🎭",
-    layout="centered"
-)
+st.set_page_config(page_title="연극 동아리 관리 시스템", page_icon="🎭")
 
-# 제목
-st.title("🎭 동아리 공동 활동 조회")
-st.caption("두 명을 선택하면 함께 참여한 공연을 확인할 수 있습니다.")
-
+st.title("🎭 동아리 활동 관리 시스템")
 st.divider()
 
 # 상태 저장
 if "df" not in st.session_state:
     st.session_state.df = None
 
-# 🔥 데이터 없을 때 안내
-if st.session_state.df is None:
-    st.info("👇 먼저 아래에서 엑셀 파일을 업로드해주세요!")
-
 # ---------------------------
-# 📌 데이터가 있을 때만 기능 활성화
-# ---------------------------
-if st.session_state.df is not None:
-    df = st.session_state.df
-
-    st.subheader("👥 인물 선택")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        person1 = st.selectbox("첫 번째 사람", df['부원명'].unique())
-
-    with col2:
-        person2 = st.selectbox("두 번째 사람", df['부원명'].unique())
-
-    st.write("")
-
-    # 버튼 중앙 정렬
-    col_btn1, col_btn2, col_btn3 = st.columns([1,2,1])
-    with col_btn2:
-        search = st.button("🔍 공동 활동 찾기", use_container_width=True, key="search_btn")
-
-    st.divider()
-
-    # 🔍 결과 출력
-    if search:
-        df1 = df[df['부원명'] == person1]
-        df2 = df[df['부원명'] == person2]
-
-        merged = pd.merge(
-            df1,
-            df2,
-            on=['연도', '공연명'],
-            suffixes=('_1', '_2')
-        )
-
-        # 🔥 연도 기준 정렬 추가
-        merged = merged.sort_values(by='연도')
-
-        if merged.empty:
-            st.warning("❌ 함께 참여한 공연이 없습니다.")
-        else:
-            st.success(f"🎉 {person1} & {person2} 공동 참여 기록")
-
-            for _, row in merged.iterrows():
-                role1 = row['역할_1']
-                role2 = row['역할_2']
-
-                if role1 == '배우' and pd.notna(row['배역_1']):
-                    role1 += f" ({row['배역_1']})"
-
-                if role2 == '배우' and pd.notna(row['배역_2']):
-                    role2 += f" ({row['배역_2']})"
-
-                with st.container():
-                    st.markdown(f"""
-                    ### 📌 {int(row['연도'])}년 - {row['공연명']}
-                    **{person1}**: {role1}  
-                    **{person2}**: {role2}
-                    """)
-                    st.divider()
-
-# ---------------------------
-# 🤝 협업 분석
-# ---------------------------
-st.divider()
-st.subheader("🤝 협업 분석")
-
-if st.session_state.df is not None:
-    df = st.session_state.df
-
-    target = st.selectbox("기준 인물 선택", df['부원명'].unique(), key="target")
-
-    if st.button("분석하기", key="analyze_btn"):
-        target_df = df[df['부원명'] == target]
-
-        # ---------------------------
-        # 🔥 1️⃣ 전체 협업 TOP 5
-        # ---------------------------
-        merged_all = pd.merge(
-            target_df[['연도', '공연명']],
-            df,
-            on=['연도', '공연명']
-        )
-
-        merged_all = merged_all[merged_all['부원명'] != target]
-
-        # 🔥 정렬 보장
-        top_all = merged_all['부원명'].value_counts().sort_values(ascending=False).head(5)
-
-        st.markdown("### 🔥 가장 많이 작업한 사람 TOP 5")
-
-        if top_all.empty:
-            st.warning("데이터 없음")
-        else:
-            for i, (name, cnt) in enumerate(top_all.items(), 1):
-                st.markdown(f"**{i}위. {name}** — {cnt}회")
-
-        st.divider()
-
-        # ---------------------------
-        # 🎭 2️⃣ 배우끼리 협업 TOP 5
-        # ---------------------------
-
-        actor_df = target_df[target_df['역할'] == '배우']
-
-        merged_actor = pd.merge(
-            actor_df[['연도', '공연명']],
-            df,
-            on=['연도', '공연명']
-        )
-
-        merged_actor = merged_actor[
-            (merged_actor['부원명'] != target) &
-            (merged_actor['역할'] == '배우')
-        ]
-
-        # 🔥 정렬 보장
-        top_actor = merged_actor['부원명'].value_counts().sort_values(ascending=False).head(5)
-
-        st.markdown("### 🎭 가장 호흡을 많이 맞춘 배우 TOP 5")
-
-        if top_actor.empty:
-            st.warning("배우 협업 데이터 없음")
-        else:
-            for i, (name, cnt) in enumerate(top_actor.items(), 1):
-                st.markdown(f"**{i}위. {name}** — {cnt}회")
-
-# ---------------------------
-# 📂 업로드 영역 (맨 아래)
+# 📂 업로드
 # ---------------------------
 st.subheader("📂 데이터 업로드")
-
-uploaded_file = st.file_uploader(
-    "엑셀 파일을 업로드하세요",
-    type=["xlsx"]
-)
+uploaded_file = st.file_uploader("엑셀 파일 업로드", type=["xlsx"])
 
 if uploaded_file:
     df = pd.read_excel(uploaded_file)
     df['연도'] = df['연도'].astype(int)
-
     st.session_state.df = df
-    st.success("✅ 데이터 업로드 완료!")
-    st.info("👆 이제 위에서 인물을 선택하세요.")
+    st.success("✅ 업로드 완료")
+
+# ---------------------------
+# 📌 데이터 없을 때
+# ---------------------------
+if st.session_state.df is None:
+    st.info("엑셀 파일을 먼저 업로드해주세요.")
+    st.stop()
+
+df = st.session_state.df
+
+st.divider()
+
+# ---------------------------
+# 1️⃣ 기능 선택
+# ---------------------------
+st.subheader("1️⃣ 기능 선택")
+
+menu = st.selectbox("기능을 선택하세요", [
+    "부원별 활동 기록 보기",
+    "공연별 참여 부원 보기",
+    "기수별 부원 보기",
+    "동아리 공동활동 찾기",
+    "여러 기록 분석"
+])
+
+st.divider()
+
+# ---------------------------
+# 2️⃣ 세부 선택
+# ---------------------------
+st.subheader("2️⃣ 세부 설정")
+
+names = df['부원명'].unique()
+shows = df['공연명'].unique()
+
+# ---------------------------
+# 기능 1️⃣
+# ---------------------------
+if menu == "부원별 활동 기록 보기":
+    person = st.selectbox("부원 선택", names)
+
+    result = df[df['부원명'] == person].sort_values(by='연도')
+
+    st.subheader(f"📜 {person} 활동 기록")
+
+    for _, row in result.iterrows():
+        role = row['역할']
+        if role == '배우' and pd.notna(row['배역']):
+            role += f" ({row['배역']})"
+
+        st.markdown(f"**{row['연도']} - {row['공연명']}** | {role}")
+
+# ---------------------------
+# 기능 2️⃣
+# ---------------------------
+elif menu == "공연별 참여 부원 보기":
+    show = st.selectbox("공연 선택", shows)
+
+    result = df[df['공연명'] == show]
+
+    st.subheader(f"🎬 {show} 참여 인원")
+
+    # 🔥 연출 먼저
+    director = result[result['역할'] == '연출']
+    others = result[result['역할'] != '연출']
+
+    if not director.empty:
+        st.markdown("### 🎯 연출")
+        for _, row in director.iterrows():
+            st.write(row['부원명'])
+
+    st.markdown("### 👥 참여 부원")
+    for _, row in others.iterrows():
+        st.write(f"{row['부원명']} - {row['역할']}")
+
+# ---------------------------
+# 기능 3️⃣
+# ---------------------------
+elif menu == "기수별 부원 보기":
+    gen = st.selectbox("기수 입력", sorted(df['기수'].dropna().unique()))
+
+    result = df[df['기수'] == gen]
+
+    st.subheader(f"🏫 {gen}기")
+
+    # 🔥 동장 / 부동장
+    leader = result[result['역할'].isin(['동장', '부동장'])]
+
+    if not leader.empty:
+        st.markdown("### 👑 운영진")
+        for _, row in leader.iterrows():
+            st.write(f"{row['역할']} - {row['부원명']}")
+
+    st.markdown("### 👥 부원")
+    for name in result['부원명'].unique():
+        st.write(name)
+
+# ---------------------------
+# 기능 4️⃣ (기존 기능)
+# ---------------------------
+elif menu == "동아리 공동활동 찾기":
+    col1, col2 = st.columns(2)
+
+    with col1:
+        p1 = st.selectbox("첫 번째 사람", names)
+    with col2:
+        p2 = st.selectbox("두 번째 사람", names)
+
+    if st.button("검색"):
+        df1 = df[df['부원명'] == p1]
+        df2 = df[df['부원명'] == p2]
+
+        merged = pd.merge(df1, df2, on=['연도','공연명'], suffixes=('_1','_2'))
+        merged = merged.sort_values(by='연도')
+
+        for _, row in merged.iterrows():
+            r1 = row['역할_1']
+            r2 = row['역할_2']
+
+            if r1 == '배우' and pd.notna(row['배역_1']):
+                r1 += f" ({row['배역_1']})"
+            if r2 == '배우' and pd.notna(row['배역_2']):
+                r2 += f" ({row['배역_2']})"
+
+            st.markdown(f"""
+            ### 📌 {row['연도']} - {row['공연명']}
+            {p1}: {r1}  
+            {p2}: {r2}
+            """)
+
+# ---------------------------
+# 기능 5️⃣ (🔥 핵심 분석)
+# ---------------------------
+elif menu == "여러 기록 분석":
+
+    st.subheader("📊 통계 분석")
+
+    # 🔥 1. 듀오 TOP
+    pair_counts = df.groupby(['연도','공연명'])['부원명'].apply(list)
+
+    pairs = {}
+    for lst in pair_counts:
+        for i in range(len(lst)):
+            for j in range(i+1, len(lst)):
+                pair = tuple(sorted([lst[i], lst[j]]))
+                pairs[pair] = pairs.get(pair,0)+1
+
+    pair_top = sorted(pairs.items(), key=lambda x: x[1], reverse=True)[:5]
+
+    st.markdown("### 🤝 듀오 TOP 5")
+    for i,(p,cnt) in enumerate(pair_top,1):
+        st.write(f"{i}. {p[0]} & {p[1]} - {cnt}회")
+
+    # 🔥 2. 참여 횟수 TOP
+    st.markdown("### 🏆 참여 TOP 5")
+    top_all = df['부원명'].value_counts().head(5)
+    for i,(n,c) in enumerate(top_all.items(),1):
+        st.write(f"{i}. {n} - {c}회")
+
+    # 🔥 3. 배우 TOP
+    st.markdown("### 🎭 배우 TOP 5")
+    actors = df[df['역할']=='배우']['부원명'].value_counts().head(5)
+    for i,(n,c) in enumerate(actors.items(),1):
+        st.write(f"{i}. {n} - {c}회")
+
+    # 🔥 4. 연도별 활동 TOP
+    st.markdown("### 📅 한 해 최다 활동 TOP 5")
+    yearly = df.groupby(['연도','부원명']).size().reset_index(name='count')
+    yearly = yearly.sort_values(by='count', ascending=False).head(5)
+
+    for i,row in yearly.iterrows():
+        st.write(f"{row['연도']} - {row['부원명']} ({row['count']}회)")
