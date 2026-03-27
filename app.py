@@ -66,7 +66,7 @@ if menu == "부원별 활동 기록 보기":
 
     for _, row in result.iterrows():
         role = row['역할']
-        if role == '배우' and pd.notna(row['배역']):
+        if role == '배우' or '단역' and pd.notna(row['배역']):
             role += f" ({row['배역']})"
 
         st.markdown(
