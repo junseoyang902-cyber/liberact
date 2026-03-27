@@ -103,9 +103,17 @@ elif menu == "공연별 참여 부원 보기":
 # 기능 3️⃣
 # ---------------------------
 elif menu == "기수별 부원 보기":
-    gen = st.selectbox("기수 선택", sorted(df['기수'].dropna().unique()))
+    import re
 
-    # 🔥 핵심: 공연명 기준 필터
+    # 🔥 공연명에서 기수 추출
+    gens = df['공연명'].dropna().apply(
+        lambda x: re.findall(r"리버액트 (\d+)기", str(x))
+    )
+    gens = sorted(set([int(g[0]) for g in gens if g]))
+
+    gen = st.selectbox("기수 선택", gens)
+
+    # 🔥 선택된 기수 필터
     result = df[df['공연명'].str.contains(f"리버액트 {gen}기", na=False)]
 
     st.subheader(f"🏫 리버액트 {gen}기")
@@ -113,15 +121,13 @@ elif menu == "기수별 부원 보기":
     if result.empty:
         st.warning("❌ 해당 기수 데이터 없음")
     else:
-        # 🔥 동장 / 부동장
         leader = result[result['역할'].isin(['동장', '부동장'])]
 
         if not leader.empty:
-            st.markdown("### 👑 운영진")
+            st.markdown("### 👑 동장진")
             for _, row in leader.iterrows():
                 st.write(f"{row['역할']} - {row['부원명']}")
 
-        # 🔥 부원 리스트 (중복 제거 + 정렬)
         members = sorted(result['부원명'].unique())
 
         st.markdown("### 👥 부원")
