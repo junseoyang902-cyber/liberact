@@ -4,30 +4,20 @@ import pandas as pd
 st.set_page_config(page_title="연극 동아리 관리 시스템", page_icon="🎭")
 
 st.title("🎭 리액위키")
+st.caption("📊 모든 데이터는 공용 데이터 기준으로 표시됩니다.")
 st.divider()
 
-# 상태 저장
+# ---------------------------
+# 📂 공용 데이터 자동 로딩
+# ---------------------------
 if "df" not in st.session_state:
-    st.session_state.df = None
-
-# ---------------------------
-# 📂 업로드
-# ---------------------------
-st.subheader("📂 데이터 업로드")
-uploaded_file = st.file_uploader("엑셀 파일 업로드", type=["xlsx"])
-
-if uploaded_file:
-    df = pd.read_excel(uploaded_file)
-    df['연도'] = df['연도'].astype(int)
-    st.session_state.df = df
-    st.success("✅ 업로드 완료")
-
-# ---------------------------
-# 📌 데이터 없을 때
-# ---------------------------
-if st.session_state.df is None:
-    st.info("엑셀 파일을 먼저 업로드해주세요.")
-    st.stop()
+    try:
+        df = pd.read_excel("data.xlsx")
+        df['연도'] = df['연도'].astype(int)
+        st.session_state.df = df
+    except:
+        st.error("❌ data.xlsx 파일을 찾을 수 없습니다.")
+        st.stop()
 
 df = st.session_state.df
 
@@ -83,7 +73,6 @@ elif menu == "공연별 참여 부원 보기":
 
     st.subheader(f"🎬 {show} 참여 인원")
 
-    # 🔥 연출 먼저
     director = result[result['역할'] == '연출']
     others = result[result['역할'] != '연출']
 
@@ -106,7 +95,6 @@ elif menu == "기수별 부원 보기":
 
     st.subheader(f"🏫 {gen}기")
 
-    # 🔥 동장 / 부동장
     leader = result[result['역할'].isin(['동장', '부동장'])]
 
     if not leader.empty:
@@ -119,7 +107,7 @@ elif menu == "기수별 부원 보기":
         st.write(name)
 
 # ---------------------------
-# 기능 4️⃣ (기존 기능)
+# 기능 4️⃣
 # ---------------------------
 elif menu == "동아리 공동활동 찾기":
     col1, col2 = st.columns(2)
@@ -129,36 +117,38 @@ elif menu == "동아리 공동활동 찾기":
     with col2:
         p2 = st.selectbox("두 번째 사람", names)
 
-    if st.button("검색"):
+    if st.button("검색", key="search_btn"):
         df1 = df[df['부원명'] == p1]
         df2 = df[df['부원명'] == p2]
 
         merged = pd.merge(df1, df2, on=['연도','공연명'], suffixes=('_1','_2'))
         merged = merged.sort_values(by='연도')
 
-        for _, row in merged.iterrows():
-            r1 = row['역할_1']
-            r2 = row['역할_2']
+        if merged.empty:
+            st.warning("❌ 공동 활동 없음")
+        else:
+            for _, row in merged.iterrows():
+                r1 = row['역할_1']
+                r2 = row['역할_2']
 
-            if r1 == '배우' and pd.notna(row['배역_1']):
-                r1 += f" ({row['배역_1']})"
-            if r2 == '배우' and pd.notna(row['배역_2']):
-                r2 += f" ({row['배역_2']})"
+                if r1 == '배우' and pd.notna(row['배역_1']):
+                    r1 += f" ({row['배역_1']})"
+                if r2 == '배우' and pd.notna(row['배역_2']):
+                    r2 += f" ({row['배역_2']})"
 
-            st.markdown(f"""
-            ### 📌 {row['연도']} - {row['공연명']}
-            {p1}: {r1}  
-            {p2}: {r2}
-            """)
+                st.markdown(f"""
+                ### 📌 {row['연도']} - {row['공연명']}
+                {p1}: {r1}  
+                {p2}: {r2}
+                """)
 
 # ---------------------------
-# 기능 5️⃣ (🔥 핵심 분석)
+# 기능 5️⃣
 # ---------------------------
 elif menu == "여러 기록 분석":
 
     st.subheader("📊 통계 분석")
 
-    # 🔥 1. 듀오 TOP
     pair_counts = df.groupby(['연도','공연명'])['부원명'].apply(list)
 
     pairs = {}
@@ -174,22 +164,19 @@ elif menu == "여러 기록 분석":
     for i,(p,cnt) in enumerate(pair_top,1):
         st.write(f"{i}. {p[0]} & {p[1]} - {cnt}회")
 
-    # 🔥 2. 참여 횟수 TOP
     st.markdown("### 🏆 참여 TOP 5")
     top_all = df['부원명'].value_counts().head(5)
     for i,(n,c) in enumerate(top_all.items(),1):
         st.write(f"{i}. {n} - {c}회")
 
-    # 🔥 3. 배우 TOP
     st.markdown("### 🎭 배우 TOP 5")
     actors = df[df['역할']=='배우']['부원명'].value_counts().head(5)
     for i,(n,c) in enumerate(actors.items(),1):
         st.write(f"{i}. {n} - {c}회")
 
-    # 🔥 4. 연도별 활동 TOP
     st.markdown("### 📅 한 해 최다 활동 TOP 5")
     yearly = df.groupby(['연도','부원명']).size().reset_index(name='count')
     yearly = yearly.sort_values(by='count', ascending=False).head(5)
 
-    for i,row in yearly.iterrows():
+    for _, row in yearly.iterrows():
         st.write(f"{row['연도']} - {row['부원명']} ({row['count']}회)")
