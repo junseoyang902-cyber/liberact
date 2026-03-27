@@ -78,6 +78,17 @@ if menu == "부원별 활동 기록 보기":
 # ---------------------------
 # 기능 2️⃣
 # ---------------------------
+def format_role(row):
+    role = str(row['역할'])
+
+    if (
+        ('배우' in role) or 
+        ('단역' in role)
+    ) and pd.notna(row.get('배역')):
+        role += f" ({row['배역']})"
+
+    return role
+
 elif menu == "공연별 참여 부원 보기":
     show = st.selectbox("공연 선택", shows)
 
@@ -104,8 +115,8 @@ elif menu == "공연별 참여 부원 보기":
 
         st.markdown("### 👥 참여 부원")
         for _, row in others.iterrows():
-            st.write(f"{row['부원명']} - {row['역할']}")
-
+            role = format_role(row)
+            st.write(f"{row['부원명']} - {role}")
     # 🔥 일반 공연 → 연출진 중심
     else:
 
@@ -125,8 +136,9 @@ elif menu == "공연별 참여 부원 보기":
                 st.write(f"{row['부원명']} - {row['역할']}")
 
         st.markdown("### 👥 참여 부원")
-        for _, row in others.iterrows():
-            st.write(f"{row['부원명']} - {row['역할']}")
+        for _, row in leaders.iterrows():
+            role = format_role(row)
+            st.write(f"{row['부원명']} - {role}")
 # ---------------------------
 # 기능 3️⃣
 # ---------------------------
