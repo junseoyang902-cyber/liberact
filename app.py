@@ -98,7 +98,28 @@ elif menu == "공연별 참여 부원 보기":
     st.subheader(f"🎬 {show} 참여 인원")
 
     # 🔥 워크샵이면 연출 중심
-    if "워크샵" or "새터" in show:
+    if "워크샵" in show:
+
+        # 🔥 연출 (연출 포함)
+        director = result[result['역할'].str.contains('연출', na=False)]
+
+        # 🔥 참여 부원 조건
+        others = result[
+            (~result['역할'].str.contains('연출', na=False)) |   # 연출이 아니거나
+            (result['역할'].str.contains(',', na=False))        # 연출 + 다른 역할
+        ]
+        
+        if not director.empty:
+            st.markdown("### 🎬 연출")
+            for _, row in director.iterrows():
+                st.write(row['부원명'])
+
+        st.markdown("### 👥 참여 부원")
+        for _, row in others.iterrows():
+            role = format_role(row)
+            st.write(f"{row['부원명']} - {role}")
+
+    elif "새터" in show:
 
         # 🔥 연출 (연출 포함)
         director = result[result['역할'].str.contains('연출', na=False)]
