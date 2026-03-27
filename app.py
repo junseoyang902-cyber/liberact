@@ -85,22 +85,42 @@ elif menu == "공연별 참여 부원 보기":
 
     st.subheader(f"🎬 {show} 참여 인원")
 
-    director = result[result['역할'] == '연출']
-    leaders = result[result['연출진'] == 'O']
-    others = result[
-        (result['역할'] != '연출') &
-        (result['연출진'] != 'O')
-    ]
+    # 🔥 워크샵이면 연출 중심
+    if "워크샵" in show:
 
-    if not leaders.empty:
-        st.markdown("### ⭐ 연출진")
-        for _, row in leaders.iterrows():
+        director = result[result['역할'] == '연출']
+        others = result[result['역할'] != '연출']
+
+        if not director.empty:
+            st.markdown("### 🎬 연출")
+            for _, row in director.iterrows():
+                st.write(row['부원명'])
+
+        st.markdown("### 👥 참여 부원")
+        for _, row in others.iterrows():
             st.write(f"{row['부원명']} - {row['역할']}")
 
-    st.markdown("### 👥 참여 부원")
-    for _, row in others.iterrows():
-        st.write(f"{row['부원명']} - {row['역할']}")
+    # 🔥 일반 공연 → 연출진 중심
+    else:
 
+        leaders = result[
+            (result['연출진'] == 'O') |
+            (result['역할'] == '연출')
+        ]
+
+        others = result[
+            (result['연출진'] != 'O') &
+            (result['역할'] != '연출')
+        ]
+
+        if not leaders.empty:
+            st.markdown("### ⭐ 연출진")
+            for _, row in leaders.iterrows():
+                st.write(f"{row['부원명']} - {row['역할']}")
+
+        st.markdown("### 👥 참여 부원")
+        for _, row in others.iterrows():
+            st.write(f"{row['부원명']} - {row['역할']}")
 # ---------------------------
 # 기능 3️⃣
 # ---------------------------
