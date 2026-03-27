@@ -137,7 +137,7 @@ elif menu == "공연별 참여 부원 보기":
                 st.write(f"{row['부원명']} - {row['역할']}")
 
         st.markdown("### 👥 참여 부원")
-        for _, row in leaders.iterrows():
+        for _, row in others.iterrows():
             role = format_role(row)
             st.write(f"{row['부원명']} - {role}")
 # ---------------------------
