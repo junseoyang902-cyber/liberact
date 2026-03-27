@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="연극 동아리 관리 시스템", page_icon="🎭")
+st.set_page_config(page_title="리액위키", page_icon="🎭")
 
 st.title("🎭 리액위키")
 st.caption("📊 모든 데이터는 공용 데이터 기준으로 표시됩니다.")
