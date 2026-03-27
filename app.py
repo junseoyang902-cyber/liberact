@@ -129,9 +129,9 @@ elif menu == "기수별 부원 보기":
 
         if not leader.empty:
             if gen > 1:
-                st.markdown(f"### 👑 운영진 ({gen-1}기)")
+                st.markdown(f"### 👑 동장진 ({gen-1}기)")
             else:
-                st.markdown("### 👑 운영진")
+                st.markdown("### 👑 동장진")
             for _, row in leader.iterrows():
                 st.write(f"{row['역할']} - {row['부원명']}")
 
