@@ -78,18 +78,19 @@ if menu == "부원별 활동 기록 보기":
 # ---------------------------
 # 기능 2️⃣
 # ---------------------------
-def format_role(row):
-    role = str(row['역할'])
-
-    if (
-        ('배우' in role) or 
-        ('단역' in role)
-    ) and pd.notna(row.get('배역')):
-        role += f" ({row['배역']})"
-
-    return role
-
 elif menu == "공연별 참여 부원 보기":
+
+    def format_role(row):
+        role = str(row['역할'])
+
+        if (
+            ('배우' in role) or 
+            ('단역' in role)
+        ) and pd.notna(row.get('배역')):
+            role += f" ({row['배역']})"
+
+        return role
+    
     show = st.selectbox("공연 선택", shows)
 
     result = df_show[df_show['공연명'] == show]
