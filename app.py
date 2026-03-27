@@ -86,7 +86,7 @@ elif menu == "공연별 참여 부원 보기":
     st.subheader(f"🎬 {show} 참여 인원")
 
     # 🔥 워크샵이면 연출 중심
-    if "워크샵" in show:
+    if "워크샵" or "새터" in show:
 
         director = result[result['역할'] == '연출']
         others = result[result['역할'] != '연출']
