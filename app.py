@@ -15,9 +15,9 @@ if "df" not in st.session_state:
         df = pd.read_excel("data.xlsx")
         df['연도'] = df['연도'].astype(int)
 
-        # 🔥 기연감 NaN 방지
-        if '기연감' in df.columns:
-            df['기연감'] = df['기연감'].fillna('')
+        # 🔥 연출진 NaN 방지
+        if '연출진' in df.columns:
+            df['연출진'] = df['연출진'].fillna('')
 
         st.session_state.df = df
     except:
@@ -86,14 +86,14 @@ elif menu == "공연별 참여 부원 보기":
     st.subheader(f"🎬 {show} 참여 인원")
 
     director = result[result['역할'] == '연출']
-    leaders = result[result['기연감'] == 'O']
+    leaders = result[result['연출진'] == 'O']
     others = result[
         (result['역할'] != '연출') &
-        (result['기연감'] != 'O')
+        (result['연출진'] != 'O')
     ]
 
     if not leaders.empty:
-        st.markdown("### ⭐ 기연감")
+        st.markdown("### ⭐ 연출진")
         for _, row in leaders.iterrows():
             st.write(f"{row['부원명']} - {row['역할']}")
 
