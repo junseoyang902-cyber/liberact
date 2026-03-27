@@ -68,7 +68,10 @@ if menu == "부원별 활동 기록 보기":
         if role == '배우' and pd.notna(row['배역']):
             role += f" ({row['배역']})"
 
-        st.markdown(f"**{row['연도']} - {row['공연명']}** | {role}")
+        st.markdown(
+    f"<b>{row['연도']} - {row['공연명']}</b><br><span style='color:gray'>{role}</span>",
+    unsafe_allow_html=True
+)
 
 # ---------------------------
 # 기능 2️⃣
@@ -87,13 +90,8 @@ elif menu == "공연별 참여 부원 보기":
         (result['기연감'] != 'O')
     ]
 
-    if not director.empty:
-        st.markdown("### 🎯 연출")
-        for _, row in director.iterrows():
-            st.write(row['부원명'])
-
     if not leaders.empty:
-        st.markdown("### ⭐ 기획/연출/감독 (기연감)")
+        st.markdown("### ⭐ 기연감")
         for _, row in leaders.iterrows():
             st.write(f"{row['부원명']} - {row['역할']}")
 
@@ -105,23 +103,31 @@ elif menu == "공연별 참여 부원 보기":
 # 기능 3️⃣
 # ---------------------------
 elif menu == "기수별 부원 보기":
-    gen = st.selectbox("기수 입력", sorted(df['기수'].dropna().unique()))
+    gen = st.selectbox("기수 선택", sorted(df['기수'].dropna().unique()))
 
-    result = df[df['기수'] == gen]
+    # 🔥 핵심: 공연명 기준 필터
+    result = df[df['공연명'].str.contains(f"리버액트 {gen}기", na=False)]
 
-    st.subheader(f"🏫 {gen}기")
+    st.subheader(f"🏫 리버액트 {gen}기")
 
-    leader = result[result['역할'].isin(['동장', '부동장'])]
+    if result.empty:
+        st.warning("❌ 해당 기수 데이터 없음")
+    else:
+        # 🔥 동장 / 부동장
+        leader = result[result['역할'].isin(['동장', '부동장'])]
 
-    if not leader.empty:
-        st.markdown("### 👑 운영진")
-        for _, row in leader.iterrows():
-            st.write(f"{row['역할']} - {row['부원명']}")
+        if not leader.empty:
+            st.markdown("### 👑 운영진")
+            for _, row in leader.iterrows():
+                st.write(f"{row['역할']} - {row['부원명']}")
 
-    st.markdown("### 👥 부원")
-    for name in result['부원명'].unique():
-        st.write(name)
+        # 🔥 부원 리스트 (중복 제거 + 정렬)
+        members = sorted(result['부원명'].unique())
 
+        st.markdown("### 👥 부원")
+        for name in members:
+            st.write(name)
+            
 # ---------------------------
 # 기능 4️⃣
 # ---------------------------
