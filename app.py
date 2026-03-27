@@ -40,8 +40,8 @@ menu = st.selectbox("기능을 선택하세요", [
     "부원별 활동 기록 보기",
     "공연별 참여 부원 보기",
     "기수별 부원 보기",
-    "동아리 공동활동 찾기",
-    "여러 기록 분석"
+    "둘이 어떻게 아세요",
+    "리액 이모저모 기록"
 ])
 
 st.divider()
@@ -148,7 +148,7 @@ elif menu == "기수별 부원 보기":
 # ---------------------------
 # 기능 4️⃣
 # ---------------------------
-elif menu == "동아리 공동활동 찾기":
+elif menu == "둘이 어떻게 아세요":
     col1, col2 = st.columns(2)
 
     with col1:
@@ -184,7 +184,7 @@ elif menu == "동아리 공동활동 찾기":
 # ---------------------------
 # 기능 5️⃣
 # ---------------------------
-elif menu == "여러 기록 분석":
+elif menu == "리액 이모저모 기록":
 
     st.subheader("📊 통계 분석")
 
@@ -205,13 +205,13 @@ elif menu == "여러 기록 분석":
         st.write(f"{i}. {p[0]} & {p[1]} - {cnt}회")
 
     # 🔥 참여 TOP (df_show 기준)
-    st.markdown("### 🏆 참여 TOP 5")
+    st.markdown("### 🏆 총 참여 횟수 TOP 5")
     top_all = df_show['부원명'].value_counts().head(5)
     for i,(n,c) in enumerate(top_all.items(),1):
         st.write(f"{i}. {n} - {c}회")
 
     # 🔥 배우 TOP (df_show 기준)
-    st.markdown("### 🎭 배우 TOP 5")
+    st.markdown("### 🎭 배우 횟수 TOP 5")
     actors = df[df['역할'].str.contains('배우', na=False)]['부원명'].value_counts().head(5)
     for i,(n,c) in enumerate(actors.items(),1):
         st.write(f"{i}. {n} - {c}회")
