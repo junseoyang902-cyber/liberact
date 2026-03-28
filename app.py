@@ -158,7 +158,8 @@ elif menu == "공연별 참여 부원 보기":
 
     # 🔥 워크샵 여부 판단
     is_workshop = "워크샵" in show
-
+    is_newist = "새터" in show
+    
     # ---------------------------
     # ⭐ 연출 (연출 포함이면 무조건)
     # ---------------------------
@@ -173,6 +174,21 @@ elif menu == "공연별 참여 부원 보기":
     # 🔥 워크샵이면 → 연출진 무시
     # ---------------------------
     if is_workshop:
+
+        others = result[
+            (~result["역할"].str.contains("연출", na=False)) |
+            (result["역할"].str.contains(",", na=False))
+        ]
+
+        st.markdown("### 👥 참여 부원")
+        for _, row in others.iterrows():
+            role = format_role(row)
+            st.write(f"{row['부원명']} - {role}")
+            
+    # ---------------------------
+    # 🔥 새터면 → 연출진 무시
+    # ---------------------------
+    if is_newist:
 
         others = result[
             (~result["역할"].str.contains("연출", na=False)) |
