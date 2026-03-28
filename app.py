@@ -108,6 +108,14 @@ elif menu == "공연별 참여 부원 보기":
             return 3
         else:
             return 4
+
+    def sort_member(row):
+        role = str(row["역할"])
+
+        if ("배우" in role) or ("단역" in role):
+            return 0
+        else:
+            return 1
     
     # ---------------------------
     # 📌 카테고리 분류
@@ -195,9 +203,13 @@ elif menu == "공연별 참여 부원 보기":
             st.write(f"{row['부원명']} - {role}")
 
     st.markdown("### 👥 참여 부원")
+    others = others.copy()
+    others["정렬"] = others.apply(sort_member, axis=1)
+    others = others.sort_values(by="정렬")
     for _, row in others.iterrows():
         role = format_role(row)
         st.write(f"{row['부원명']} - {role}")
+
 # ---------------------------
 # 기능 3️⃣
 # ---------------------------
