@@ -3,13 +3,22 @@ import pandas as pd
 
 st.set_page_config(page_title="리액위키", page_icon="🎭")
 
-st.session_state.history = []
-st.session_state.menu
-st.session_state.selected_person
-
 st.title("🎭 리액위키")
 st.caption("모든 데이터의 출처는 [리버액트 역대 공연 연혁](https://slowdemoc.notion.site/dd6b64eea8784adebb3363d6db65d591?source=copy_link) 페이지입니다.")
 st.caption("🛠️ made by 양준서")
+
+if "menu" not in st.session_state:
+    st.session_state.menu = "부원별 활동 기록 보기"
+
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+if "selected_person" not in st.session_state:
+    st.session_state.selected_person = None
+
+st.session_state.history = []
+st.session_state.menu
+st.session_state.selected_person
 
 def save_history():
     st.session_state.history.append({
@@ -77,7 +86,7 @@ if col4.button("🤝 어떻게 아는 사이세요?"):
 if col5.button("👑 리액 명예의 전당"):
     st.session_state.menu = "리액 이모저모 기록"
 
-menu = st.session_state.get("menu", "부원별 활동 기록 보기")
+menu = st.session_state.menu
 
 st.divider()
 
