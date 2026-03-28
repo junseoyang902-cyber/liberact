@@ -280,7 +280,12 @@ elif menu == "기수별 부원 보기":
             else:
                 st.markdown("### 👑 동장진")
             for _, row in leader.iterrows():
-                st.write(f"{row['역할']} - {row['부원명']}")
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    if st.button(row['부원명'], key=f"leader_{row['부원명']}"):
+                        go_person(row['부원명'])
+                with col2:
+                    st.write(row['역할'])
 
         members = sorted(
     result[~result['역할'].isin(['동장', '부동장'])]['부원명'].unique()
@@ -292,9 +297,11 @@ elif menu == "기수별 부원 보기":
 
         for i, name in enumerate(members):
             if i % 2 == 0:
-                col1.write(name)
+                if col1.button(name, key=f"mem1_{name}_{i}"):
+                    go_person(name)
             else:
-                col2.write(name)            
+                if col2.button(name, key=f"mem2_{name}_{i}"):
+                    go_person(name)     
 # ---------------------------
 # 기능 4️⃣
 # ---------------------------
@@ -327,9 +334,19 @@ elif menu == "둘이 어떻게 아세요":
 
                 st.markdown(f"""
                 ### 📌 {row['연도']} - {row['공연명']}
-                {p1}: {r1}  
-                {p2}: {r2}
                 """)
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    if st.button(p1, key=f"p1_{_}"):
+                        go_person(p1)
+                    st.write(r1)
+
+                with col2:
+                    if st.button(p2, key=f"p2_{_}"):
+                        go_person(p2)
+                    st.write(r2)
 
 # ---------------------------
 # 기능 5️⃣
