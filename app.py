@@ -36,13 +36,24 @@ st.divider()
 # ---------------------------
 st.subheader("1️⃣ 기능 선택")
 
-menu = st.selectbox("기능을 선택하세요", [
-    "부원별 활동 기록 보기",
-    "공연별 참여 부원 보기",
-    "기수별 부원 보기",
-    "둘이 어떻게 아세요",
-    "리액 이모저모 기록"
-])
+col1, col2, col3, col4, col5 = st.columns(5)
+
+if col1.button("📜 부원"):
+    st.session_state.menu = "부원별 활동 기록 보기"
+
+if col2.button("🎬 공연"):
+    st.session_state.menu = "공연별 참여 부원 보기"
+
+if col3.button("🏫 기수"):
+    st.session_state.menu = "기수별 부원 보기"
+
+if col4.button("🤝 공동활동"):
+    st.session_state.menu = "동아리 공동활동 찾기"
+
+if col5.button("📊 분석"):
+    st.session_state.menu = "여러 기록 분석"
+
+menu = st.session_state.get("menu", "부원별 활동 기록 보기")
 
 st.divider()
 
@@ -80,88 +91,126 @@ if menu == "부원별 활동 기록 보기":
 # ---------------------------
 elif menu == "공연별 참여 부원 보기":
 
+    # ---------------------------
+    # 📌 공연 카테고리 분류 함수
+    # ---------------------------
+    def classify_show(name):
+        if "정기" in name:
+            return "정기공연"
+        elif "OB" in name:
+            return "OB공연"
+        elif "워크샵" in name:
+            return "워크샵공연"
+        elif "새터" in name:
+            return "새터공연"
+        else:
+            return "기타"
+
+    # 카테고리 컬럼 생성 (최초 1회)
+    if "카테고리" not in df_show.columns:
+        df_show["카테고리"] = df_show["공연명"].apply(classify_show)
+
+    # ---------------------------
+    # 📌 카테고리 선택 (순서 고정)
+    # ---------------------------
+    category_order = ["정기공연", "OB공연", "워크샵공연", "새터공연", "기타"]
+
+    available_categories = [
+        c for c in category_order
+        if c in df_show["카테고리"].unique()
+    ]
+
+    category = st.selectbox("공연 유형 선택", available_categories)
+
+    # ---------------------------
+    # 📌 공연 필터 + 최신순 정렬
+    # ---------------------------
+    filtered = df_show[df_show["카테고리"] == category]
+
+    shows_sorted = (
+        filtered
+        .sort_values(by="연도", ascending=False)
+        ["공연명"]
+        .unique()
+    )
+
+    show = st.selectbox("공연 선택", shows_sorted)
+
+    # ---------------------------
+    # 📌 역할 포맷 함수
+    # ---------------------------
     def format_role(row):
-        role = str(row['역할'])
+        role = str(row["역할"])
 
         if (
-            ('배우' in role) or 
-            ('단역' in role)
-        ) and pd.notna(row.get('배역')):
+            ("배우" in role) or ("단역" in role)
+        ) and pd.notna(row.get("배역")):
             role += f" ({row['배역']})"
 
-        return role
-    
-    show = st.selectbox("공연 선택", shows)
+        return role.replace(",", " / ")
 
-    result = df_show[df_show['공연명'] == show]
+    # ---------------------------
+    # 📌 결과 출력
+    # ---------------------------
+    result = filtered[filtered["공연명"] == show]
 
     st.subheader(f"🎬 {show} 참여 인원")
 
-    # 🔥 워크샵이면 연출 중심
-    if "워크샵" in show:
+    # 🔥 워크샵 여부 판단
+    is_workshop = "워크샵" in show
 
-        # 🔥 연출 (연출 포함)
-        director = result[result['역할'].str.contains('연출', na=False)]
+    # ---------------------------
+    # ⭐ 연출 (연출 포함이면 무조건)
+    # ---------------------------
+    director = result[result["역할"].str.contains("연출", na=False)]
 
-        # 🔥 참여 부원 조건
+    if not director.empty:
+        st.markdown("### ⭐ 연출")
+        for _, row in director.iterrows():
+            st.write(row["부원명"])
+
+    # ---------------------------
+    # 🔥 워크샵이면 → 기연감 무시
+    # ---------------------------
+    if is_workshop:
+
         others = result[
-            (~result['역할'].str.contains('연출', na=False)) |   # 연출이 아니거나
-            (result['역할'].str.contains(',', na=False))        # 연출 + 다른 역할
+            (~result["역할"].str.contains("연출", na=False)) |
+            (result["역할"].str.contains(",", na=False))
         ]
-        
-        if not director.empty:
-            st.markdown("### 🎬 연출")
-            for _, row in director.iterrows():
-                st.write(row['부원명'])
 
         st.markdown("### 👥 참여 부원")
         for _, row in others.iterrows():
             role = format_role(row)
             st.write(f"{row['부원명']} - {role}")
 
-    elif "새터" in show:
-
-        # 🔥 연출 (연출 포함)
-        director = result[result['역할'].str.contains('연출', na=False)]
-
-        # 🔥 참여 부원 조건
-        others = result[
-            (~result['역할'].str.contains('연출', na=False)) |   # 연출이 아니거나
-            (result['역할'].str.contains(',', na=False))        # 연출 + 다른 역할
-        ]
-        
-        if not director.empty:
-            st.markdown("### 🎬 연출")
-            for _, row in director.iterrows():
-                st.write(row['부원명'])
-
-        st.markdown("### 👥 참여 부원")
-        for _, row in others.iterrows():
-            role = format_role(row)
-            st.write(f"{row['부원명']} - {role}")
-    # 🔥 일반 공연 → 연출진 중심
+    # ---------------------------
+    # 🔥 일반 공연
+    # ---------------------------
     else:
-
         leaders = result[
-            (result['연출진'] == 'O') |
-            (result['역할'] == '연출')
+            (result["기연감"] == "O") |
+            (result["역할"].str.contains("연출", na=False))
         ]
 
         others = result[
-            (~result['역할'].str.contains('연출', na=False)) |   # 연출이 아니거나
-            (result['역할'].str.contains(',', na=False))        # 연출 + 다른 역할
+            (result["기연감"] != "O") &
+            (
+                (~result["역할"].str.contains("연출", na=False)) |
+                (result["역할"].str.contains(",", na=False))
+            )
         ]
 
         if not leaders.empty:
-            st.markdown("### ⭐ 연출진")
+            st.markdown("### ⭐ 기획/연출/감독 (기연감)")
             for _, row in leaders.iterrows():
-                st.write(f"{row['부원명']} - {row['역할']}")
+                role = format_role(row)
+                st.write(f"{row['부원명']} - {role}")
 
         st.markdown("### 👥 참여 부원")
         for _, row in others.iterrows():
             role = format_role(row)
-            st.write(f"{row['부원명']} - {role}")
-# ---------------------------
+            st.write(f"{row['부원명']} - {role}")# ---------------------------
 # 기능 3️⃣
 # ---------------------------
 elif menu == "기수별 부원 보기":
@@ -202,9 +251,14 @@ elif menu == "기수별 부원 보기":
 )
 
         st.markdown("### 👥 부원")
-        for name in members:
-            st.write(name)
-            
+
+        col1, col2 = st.columns(2)
+
+        for i, name in enumerate(members):
+            if i % 2 == 0:
+                col1.write(name)
+            else:
+                col2.write(name)            
 # ---------------------------
 # 기능 4️⃣
 # ---------------------------
