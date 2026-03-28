@@ -48,10 +48,10 @@ if col3.button("🏫 기수별 부원"):
     st.session_state.menu = "기수별 부원 보기"
 
 if col4.button("🤝 어떻게 아는 사이세요?"):
-    st.session_state.menu = "동아리 공동활동 찾기"
+    st.session_state.menu = "둘이 어떻게 아세요"
 
 if col5.button("👑 리액 명예의 전당"):
-    st.session_state.menu = "여러 기록 분석"
+    st.session_state.menu = "리액 이모저모 기록"
 
 menu = st.session_state.get("menu", "부원별 활동 기록 보기")
 
@@ -106,9 +106,9 @@ elif menu == "공연별 참여 부원 보기":
         else:
             return "기타"
 
-    # 카테고리 컬럼 생성 (최초 1회)
-    if "카테고리" not in df_show.columns:
-        df_show["카테고리"] = df_show["공연명"].apply(classify_show)
+    df_show = df_show.copy()
+
+    df_show["카테고리"] = df_show["공연명"].apply(classify_show)
 
     # ---------------------------
     # 📌 카테고리 선택 (순서 고정)
@@ -210,7 +210,8 @@ elif menu == "공연별 참여 부원 보기":
         st.markdown("### 👥 참여 부원")
         for _, row in others.iterrows():
             role = format_role(row)
-            st.write(f"{row['부원명']} - {role}")# ---------------------------
+            st.markdown(f"**{row['부원명']}**  \n{role}")
+# ---------------------------
 # 기능 3️⃣
 # ---------------------------
 elif menu == "기수별 부원 보기":
