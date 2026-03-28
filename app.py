@@ -7,6 +7,10 @@ st.title("🎭 리액위키")
 st.caption("모든 데이터의 출처는 [리버액트 역대 공연 연혁](https://slowdemoc.notion.site/dd6b64eea8784adebb3363d6db65d591?source=copy_link) 페이지입니다.")
 st.caption("🛠️ made by 양준서")
 
+def go_person(name):
+    st.session_state.selected_person = name
+    st.session_state.menu = "부원별 활동 기록 보기"
+    
 # ---------------------------
 # 📂 공용 데이터 자동 로딩
 # ---------------------------
