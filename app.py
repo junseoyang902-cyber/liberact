@@ -38,19 +38,19 @@ st.subheader("1️⃣ 기능 선택")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
-if col1.button("📜 부원"):
+if col1.button("📜 부원별 활동 기록"):
     st.session_state.menu = "부원별 활동 기록 보기"
 
-if col2.button("🎬 공연"):
+if col2.button("🎬 공연별 참여 인원"):
     st.session_state.menu = "공연별 참여 부원 보기"
 
-if col3.button("🏫 기수"):
+if col3.button("🏫 기수별 부원"):
     st.session_state.menu = "기수별 부원 보기"
 
-if col4.button("🤝 공동활동"):
+if col4.button("🤝 어떻게 아는 사이세요?"):
     st.session_state.menu = "동아리 공동활동 찾기"
 
-if col5.button("📊 분석"):
+if col5.button("👑 리액 명예의 전당"):
     st.session_state.menu = "여러 기록 분석"
 
 menu = st.session_state.get("menu", "부원별 활동 기록 보기")
