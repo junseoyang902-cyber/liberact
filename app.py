@@ -92,7 +92,7 @@ if menu == "부원별 활동 기록 보기":
 elif menu == "공연별 참여 부원 보기":
 
     # ---------------------------
-    # 📌 공연 카테고리 분류 함수
+    # 📌 카테고리 분류
     # ---------------------------
     def classify_show(name):
         if "정기" in name:
@@ -107,37 +107,34 @@ elif menu == "공연별 참여 부원 보기":
             return "기타"
 
     df_show = df_show.copy()
-
     df_show["카테고리"] = df_show["공연명"].apply(classify_show)
 
     # ---------------------------
-    # 📌 카테고리 선택 (순서 고정)
+    # 📌 카테고리 선택
     # ---------------------------
     category_order = ["정기공연", "OB공연", "워크샵공연", "새터공연", "기타"]
 
-    available_categories = [
-        c for c in category_order
-        if c in df_show["카테고리"].unique()
-    ]
+    available = [c for c in category_order if c in df_show["카테고리"].unique()]
 
-    category = st.selectbox("공연 유형 선택", available_categories)
+    category = st.selectbox("공연 유형 선택", available)
 
     # ---------------------------
-    # 📌 공연 필터 + 최신순 정렬
+    # 📌 공연 선택 (최신순)
     # ---------------------------
     filtered = df_show[df_show["카테고리"] == category]
 
     shows_sorted = (
-        filtered
-        .sort_values(by="연도", ascending=False)
-        ["공연명"]
-        .unique()
+        filtered.sort_values(by="연도", ascending=False)["공연명"].unique()
     )
 
     show = st.selectbox("공연 선택", shows_sorted)
 
+    result = filtered[filtered["공연명"] == show]
+
+    st.subheader(f"🎬 {show} 참여 인원")
+
     # ---------------------------
-    # 📌 역할 포맷 함수
+    # 📌 역할 포맷
     # ---------------------------
     def format_role(row):
         role = str(row["역할"])
@@ -150,67 +147,36 @@ elif menu == "공연별 참여 부원 보기":
         return role.replace(",", " / ")
 
     # ---------------------------
-    # 📌 결과 출력
+    # 🎯 1️⃣ 상단 그룹 (연출진 or 연출)
     # ---------------------------
-    result = filtered[filtered["공연명"] == show]
-
-    st.subheader(f"🎬 {show} 참여 인원")
-
-    # 🔥 워크샵 여부 판단
-    is_workshop = "워크샵" in show
-    
-    # ---------------------------
-    # ⭐ 연출 (연출 포함이면 무조건)
-    # ---------------------------
-    director = result[result["역할"].str.contains("연출", na=False)]
-
-    if not director.empty:
-        st.markdown("### ⭐ 연출")
-        for _, row in director.iterrows():
-            st.write(row["부원명"])
+    if category in ["워크샵공연", "새터공연"]:
+        top_group = result[result["역할"].str.contains("연출", na=False)]
+        top_title = "### ⭐ 연출"
+    else:
+        top_group = result[result["연출진"] == "O"]
+        top_title = "### ⭐ 연출진"
 
     # ---------------------------
-    # 🔥 워크샵이면 → 연출진 무시
+    # 🎯 2️⃣ 참여 부원 (겸직 허용)
     # ---------------------------
-    if is_workshop:
+    others = result[
+        (~result.index.isin(top_group.index)) |
+        (result["역할"].str.contains(",", na=False))
+    ]
 
-        others = result[
-            (~result["역할"].str.contains("연출", na=False)) |
-            (result["역할"].str.contains(",", na=False))
-        ]
-
-        st.markdown("### 👥 참여 부원")
-        for _, row in others.iterrows():
+    # ---------------------------
+    # 📌 출력
+    # ---------------------------
+    if not top_group.empty:
+        st.markdown(top_title)
+        for _, row in top_group.iterrows():
             role = format_role(row)
             st.write(f"{row['부원명']} - {role}")
 
-    # ---------------------------
-    # 🔥 일반 공연
-    # ---------------------------
-    else:
-        leaders = result[
-            (result["연출진"] == "O") |
-            (result["역할"].str.contains("연출", na=False))
-        ]
-
-        others = result[
-            (result["연출진"] != "O") &
-            (
-                (~result["역할"].str.contains("연출", na=False)) |
-                (result["역할"].str.contains(",", na=False))
-            )
-        ]
-
-        if not leaders.empty:
-            st.markdown("### ⭐ 연출진")
-            for _, row in leaders.iterrows():
-                role = format_role(row)
-                st.write(f"{row['부원명']} - {role}")
-
-        st.markdown("### 👥 참여 부원")
-        for _, row in others.iterrows():
-            role = format_role(row)
-            st.markdown(f"**{row['부원명']}**  \n{role}")
+    st.markdown("### 👥 참여 부원")
+    for _, row in others.iterrows():
+        role = format_role(row)
+        st.write(f"{row['부원명']} - {role}")
 # ---------------------------
 # 기능 3️⃣
 # ---------------------------
