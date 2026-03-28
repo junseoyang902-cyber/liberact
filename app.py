@@ -170,7 +170,7 @@ elif menu == "공연별 참여 부원 보기":
             st.write(row["부원명"])
 
     # ---------------------------
-    # 🔥 워크샵이면 → 기연감 무시
+    # 🔥 워크샵이면 → 연출진 무시
     # ---------------------------
     if is_workshop:
 
@@ -189,12 +189,12 @@ elif menu == "공연별 참여 부원 보기":
     # ---------------------------
     else:
         leaders = result[
-            (result["기연감"] == "O") |
+            (result["연출"] == "O") |
             (result["역할"].str.contains("연출", na=False))
         ]
 
         others = result[
-            (result["기연감"] != "O") &
+            (result["연출진"] != "O") &
             (
                 (~result["역할"].str.contains("연출", na=False)) |
                 (result["역할"].str.contains(",", na=False))
@@ -202,7 +202,7 @@ elif menu == "공연별 참여 부원 보기":
         ]
 
         if not leaders.empty:
-            st.markdown("### ⭐ 기획/연출/감독 (기연감)")
+            st.markdown("### ⭐ 기획/연출/감독 (연출진)")
             for _, row in leaders.iterrows():
                 role = format_role(row)
                 st.write(f"{row['부원명']} - {role}")
