@@ -189,7 +189,7 @@ elif menu == "공연별 참여 부원 보기":
     # ---------------------------
     else:
         leaders = result[
-            (result["연출"] == "O") |
+            (result["연출진"] == "O") |
             (result["역할"].str.contains("연출", na=False))
         ]
 
