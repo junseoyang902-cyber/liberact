@@ -189,6 +189,15 @@ elif menu == "공연별 참여 부원 보기":
         (~result.index.isin(top_group.index)) |
         (result["역할"].str.contains(",", na=False))
     ]
+    others = others.copy()
+
+    # 🔥 배우 여부 (0 = 배우, 1 = 나머지)
+    others["배우우선"] = others["역할"].apply(
+        lambda x: 0 if ("배우" in str(x) or "단역" in str(x)) else 1
+    )
+
+    # 🔥 이름 기준 정렬까지 같이 적용
+    others = others.sort_values(by=["배우우선", "부원명"])
 
     # ---------------------------
     # 📌 출력
