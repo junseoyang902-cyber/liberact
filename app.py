@@ -91,6 +91,20 @@ if menu == "부원별 활동 기록 보기":
 # ---------------------------
 elif menu == "공연별 참여 부원 보기":
 
+    def sort_leader(row):
+    role = str(row["역할"])
+
+    if "연출" in role:
+        return 0
+    elif any(x in role for x in ["연기감독", "연기지도", "연기고문", "연기부연출"]):
+        return 1
+    elif any(x in role for x in ["미술감독", "미술부연출"]):
+        return 2
+    elif "기획" in role:
+        return 3
+    else:
+        return 4
+    
     # ---------------------------
     # 📌 카테고리 분류
     # ---------------------------
@@ -169,6 +183,9 @@ elif menu == "공연별 참여 부원 보기":
     # ---------------------------
     if not top_group.empty:
         st.markdown(top_title)
+        top_group = top_group.copy()
+        top_group["정렬"] = top_group.apply(sort_leader, axis=1)
+        top_group = top_group.sort_values(by="정렬")
         for _, row in top_group.iterrows():
             role = format_role(row)
             st.write(f"{row['부원명']} - {role}")
