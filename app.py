@@ -69,7 +69,18 @@ shows = df_show['공연명'].unique()
 # 기능 1️⃣
 # ---------------------------
 if menu == "부원별 활동 기록 보기":
-    person = st.selectbox("부원 선택", names)
+
+    # 🔥 외부에서 클릭된 사람 반영
+    default_person = st.session_state.get("selected_person", names[0])
+
+    person = st.selectbox(
+        "부원 선택",
+        names,
+        index=list(names).index(default_person) if default_person in names else 0
+    )
+
+    # 🔥 선택 상태 저장 (다른 기능에서 클릭 시 유지)
+    st.session_state.selected_person = person
 
     result = df[df['부원명'] == person].sort_values(by='연도')
 
@@ -82,9 +93,9 @@ if menu == "부원별 활동 기록 보기":
             role += f" ({row['배역']})"
 
         st.markdown(
-    f"<b>{row['연도']} - {row['공연명']}</b><br><span style='color:gray'>{role}</span>",
-    unsafe_allow_html=True
-)
+            f"<b>{row['연도']} - {row['공연명']}</b><br><span style='color:gray'>{role}</span>",
+            unsafe_allow_html=True
+        )
 
 # ---------------------------
 # 기능 2️⃣
@@ -213,12 +224,27 @@ elif menu == "공연별 참여 부원 보기":
         top_group = top_group.sort_values(by="정렬")
         for _, row in top_group.iterrows():
             role = format_role(row)
-            st.write(f"{row['부원명']} - {role}")
+            col1, col2 = st.columns([1, 3])
+
+            with col1:
+                if st.button(row['부원명'], key=f"show_{row['부원명']}_{_}"):
+                    go_person(row['부원명'])
+
+            with col2:
+                st.write(role)
 
     st.markdown("### 👥 참여 부원")
     for _, row in others.iterrows():
         role = format_role(row)
         st.write(f"{row['부원명']} - {role}")
+        col1, col2 = st.columns([1, 3])
+        
+        with col1:
+            if st.button(row['부원명'], key=f"show_{row['부원명']}_{_}"):
+                go_person(row['부원명'])
+
+        with col2:
+            st.write(role)
 
 # ---------------------------
 # 기능 3️⃣
