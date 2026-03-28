@@ -202,7 +202,7 @@ elif menu == "공연별 참여 부원 보기":
         ]
 
         if not leaders.empty:
-            st.markdown("### ⭐ 기획/연출/감독 (연출진)")
+            st.markdown("### ⭐ 연출진")
             for _, row in leaders.iterrows():
                 role = format_role(row)
                 st.write(f"{row['부원명']} - {role}")
