@@ -355,7 +355,9 @@ elif menu == "리액 이모저모 기록":
 
     st.subheader("📊 통계 분석")
 
-    # 🔥 듀오 TOP (df_show + 중복 제거)
+    # ---------------------------
+    # 🔥 듀오 TOP
+    # ---------------------------
     pair_counts = df_show.groupby(['연도','공연명'])['부원명'].apply(lambda x: list(set(x)))
 
     pairs = {}
@@ -368,24 +370,64 @@ elif menu == "리액 이모저모 기록":
     pair_top = sorted(pairs.items(), key=lambda x: x[1], reverse=True)[:5]
 
     st.markdown("### 🤝 듀오 TOP 5")
-    for i,(p,cnt) in enumerate(pair_top,1):
-        st.write(f"{i}. {p[0]} & {p[1]} - {cnt}회")
+    for i, (p, cnt) in enumerate(pair_top, 1):
+        col1, col2, col3 = st.columns([1,1,2])
 
-    # 🔥 참여 TOP (df_show 기준)
+        with col1:
+            if st.button(p[0], key=f"pair1_{p[0]}_{i}"):
+                go_person(p[0])
+
+        with col2:
+            if st.button(p[1], key=f"pair2_{p[1]}_{i}"):
+                go_person(p[1])
+
+        with col3:
+            st.write(f"{i}. {cnt}회")
+
+    # ---------------------------
+    # 🔥 총 참여 TOP
+    # ---------------------------
     st.markdown("### 🏆 총 참여 횟수 TOP 5")
     top_all = df_show['부원명'].value_counts().head(5)
-    for i,(n,c) in enumerate(top_all.items(),1):
-        st.write(f"{i}. {n} - {c}회")
 
-    # 🔥 배우 TOP (df_show 기준)
+    for i, (name, count) in enumerate(top_all.items(), 1):
+        col1, col2 = st.columns([1,3])
+
+        with col1:
+            if st.button(name, key=f"top_all_{name}_{i}"):
+                go_person(name)
+
+        with col2:
+            st.write(f"{i}. {count}회")
+
+    # ---------------------------
+    # 🔥 배우 TOP
+    # ---------------------------
     st.markdown("### 🎭 배우 횟수 TOP 5")
     actors = df[df['역할'].str.contains('배우', na=False)]['부원명'].value_counts().head(5)
-    for i,(n,c) in enumerate(actors.items(),1):
-        st.write(f"{i}. {n} - {c}회")
 
+    for i, (name, count) in enumerate(actors.items(), 1):
+        col1, col2 = st.columns([1,3])
+
+        with col1:
+            if st.button(name, key=f"actor_{name}_{i}"):
+                go_person(name)
+
+        with col2:
+            st.write(f"{i}. {count}회")
+
+    # ---------------------------
+    # 🔥 연출진 TOP
+    # ---------------------------
     st.markdown("### ⭐ 연출진 기록 TOP 5")
-
     leaders = df[df['연출진'] == 'O']['부원명'].value_counts().head(5)
 
     for i, (name, count) in enumerate(leaders.items(), 1):
-        st.write(f"{i}. {name} - {count}회")
+        col1, col2 = st.columns([1,3])
+
+        with col1:
+            if st.button(name, key=f"leader_{name}_{i}"):
+                go_person(name)
+
+        with col2:
+            st.write(f"{i}. {count}회")
