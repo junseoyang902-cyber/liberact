@@ -16,10 +16,6 @@ if "history" not in st.session_state:
 if "selected_person" not in st.session_state:
     st.session_state.selected_person = None
 
-st.session_state.history = []
-st.session_state.menu
-st.session_state.selected_person
-
 def save_history():
     st.session_state.history.append({
         "menu": st.session_state.get("menu"),
@@ -37,8 +33,9 @@ def go_back():
         st.session_state.menu = last["menu"]
         st.session_state.selected_person = last["person"]
 
-if st.button("⬅️ 뒤로가기"):
-    go_back()
+if st.session_state.history:
+    if st.button("⬅️ 뒤로가기"):
+        go_back()
 
 # ---------------------------
 # 📂 공용 데이터 자동 로딩
