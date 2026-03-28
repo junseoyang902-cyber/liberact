@@ -23,15 +23,17 @@ def save_history():
     })
 
 def go_person(name):
-    save_history()  # 🔥 이동 전에 저장
+    save_history()
     st.session_state.selected_person = name
     st.session_state.menu = "부원별 활동 기록 보기"
+    st.rerun()  # 🔥 이거 핵심
 
 def go_back():
     if st.session_state.history:
         last = st.session_state.history.pop()
         st.session_state.menu = last["menu"]
         st.session_state.selected_person = last["person"]
+        st.rerun()  # 🔥 이것도 있어야 완벽
 
 if st.session_state.history:
     if st.button("⬅️ 뒤로가기"):
