@@ -96,7 +96,7 @@ elif menu == "공연별 참여 부원 보기":
 
         if "연출" == role:
             return 0
-        elif "연출/기획" == role:
+        elif "연출, 기획" == role:
             return 0
         elif "조연출" in role:
             return 0.5
