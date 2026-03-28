@@ -196,8 +196,8 @@ elif menu == "공연별 참여 부원 보기":
         lambda x: 0 if ("배우" in str(x) or "단역" in str(x)) else 1
     )
 
-    # 🔥 이름 기준 정렬까지 같이 적용
-    others = others.sort_values(by=["배우우선", "부원명"])
+    # 🔥 역할 기준 + 이름 기준 정렬
+    others = others.sort_values(by=["배우우선", "역할", "부원명"])
 
     # ---------------------------
     # 📌 출력
