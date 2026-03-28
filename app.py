@@ -94,7 +94,7 @@ elif menu == "공연별 참여 부원 보기":
     def sort_leader(row):
         role = str(row["역할"])
 
-        if "연출" in role:
+        if "연출" == role:
             return 0
         elif "조연출" in role:
             return 0.5
